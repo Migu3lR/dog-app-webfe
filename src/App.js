@@ -4,32 +4,22 @@ import { Nav, Navbar, NavItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { Auth, PubSub } from "aws-amplify";
 
+import { connect } from 'react-redux';
+import { authValidation } from './actions/authenticate';
+
 import { attachIotPolicy } from "./libs/awsMqtt";
 
 import './App.css';
 import Routes from "./Routes";
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isAuthenticated: false,
-      isAuthenticating: true
-    };
-
-  }
-
   async componentDidMount() {
-    try {
-      await attachIotPolicy();
-      PubSub.subscribe(['/myTopi','/myTopic1']).subscribe({
-        next: (data) => {
-          console.log('Message received', data);
-        },
-        error: error => console.error(error),
-        close: () => console.log('Done'),
-      })
+    await attachIotPolicy();
+
+    const credentials = await Auth.currentSession();
+    this.props.authValidation(credentials);
+
+    /*try {      
       if (await Auth.currentSession()) {
         this.userHasAuthenticated(true);
       }
@@ -39,25 +29,36 @@ class App extends Component {
       }
     }
 
-    this.setState({ isAuthenticating: false });
+    this.setState({ isAuthenticating: false });*/
   }
 
-  userHasAuthenticated = authenticated => {
-    this.setState({ isAuthenticated: authenticated });
+  IOTSubs = async () => {
+    await attachIotPolicy();
+    
+    PubSub.subscribe(`/redux/${PubSub._pluggables[0].clientId}`).subscribe({
+      next: (data) => {
+        console.log('Message received', data);
+      },
+      error: error => console.error(error),
+      close: () => console.log('Done'),
+    })
   }
+
+  /*userHasAuthenticated = authenticated => {
+    this.setState({ isAuthenticated: authenticated });
+  }*/
 
   handleLogout = async event => {
     await Auth.signOut();
-
-    this.userHasAuthenticated(false);
+    this.props.logout();
     
     this.props.history.push("/login");
   }
 
   render() {
     const childProps = {
-      isAuthenticated: this.state.isAuthenticated,
-      userHasAuthenticated: this.userHasAuthenticated
+      isAuthenticated: this.props.isAuthenticated,
+      userHasAuthenticated: this.props.userHasAuthenticated
     };
 
     return (
@@ -92,4 +93,18 @@ class App extends Component {
   }
 }
 
-export default withRouter(App);
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.isAuthenticated,
+    isAuthenticating: state.isAuthenticating
+  }
+}
+
+const MapDispatchToProps = (dispatch) => {
+  return {
+    authValidation: (credentials) => dispatch(authValidation(credentials)),
+    logout: () => dispatch(isAuthenticated(false))
+  }
+}
+
+export default withRouter(connect(mapStateToProps, MapDispatchToProps)(App));

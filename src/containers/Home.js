@@ -16,7 +16,11 @@ export default class Home extends Component {
   }
 
   async componentDidMount() {
-    await PubSub.publish('/myTopic1', 'hola 1');
+    await PubSub.publish('/redux/api/prueba', 
+    {
+      message: "hola",
+      cid: PubSub._pluggables[0].clientId
+    });
     
     if (!this.props.isAuthenticated) {
       return;
