@@ -13,5 +13,9 @@ export default {
     USER_POOL_ID: "us-east-1_lZyNzxLpl",
     APP_CLIENT_ID: "7a470d45rirfsjbd01llt6em0s",
     IDENTITY_POOL_ID: "us-east-1:c8858a20-180f-45ac-b6fd-cc096cafdb94"
+  },
+  iot: {
+    REGION: "us-east-1",
+    ENDPOINT: "a1ibjimaoot6ov.iot.us-east-1.amazonaws.com"
   }
 };

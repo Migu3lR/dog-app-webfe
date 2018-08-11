@@ -2,7 +2,9 @@ import React, { Component, Fragment } from 'react';
 import { Link, withRouter } from "react-router-dom";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-import { Auth } from "aws-amplify";
+import { Auth, PubSub } from "aws-amplify";
+
+import { attachIotPolicy } from "./libs/awsMqtt";
 
 import './App.css';
 import Routes from "./Routes";
@@ -15,10 +17,19 @@ class App extends Component {
       isAuthenticated: false,
       isAuthenticating: true
     };
+
   }
 
   async componentDidMount() {
     try {
+      await attachIotPolicy();
+      PubSub.subscribe(['/myTopi','/myTopic1']).subscribe({
+        next: (data) => {
+          console.log('Message received', data);
+        },
+        error: error => console.error(error),
+        close: () => console.log('Done'),
+      })
       if (await Auth.currentSession()) {
         this.userHasAuthenticated(true);
       }

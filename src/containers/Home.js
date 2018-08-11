@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { PageHeader, ListGroup, ListGroupItem } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { API } from "aws-amplify";
+import { API, PubSub } from "aws-amplify";
 
 import "./Home.css";
 
@@ -16,6 +16,8 @@ export default class Home extends Component {
   }
 
   async componentDidMount() {
+    await PubSub.publish('/myTopic1', 'hola 1');
+    
     if (!this.props.isAuthenticated) {
       return;
     }
