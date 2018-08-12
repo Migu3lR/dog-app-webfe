@@ -17,11 +17,11 @@ export function isAuthenticating(bool) {
 export function authValidation(credentials) {
     return (dispatch) => {
         dispatch(isAuthenticating(true));
-
+        
         PubSub.subscribe(`/redux/${PubSub._pluggables[0].clientId}/authValidated`).subscribe({
             next: (result) => {
                 console.log('Auth validation received', result);
-                dispatch(isAuthenticated(result.validation));
+                dispatch(isAuthenticated(result.value.validation));
                 dispatch(isAuthenticating(false));
             },
             error: error => {
@@ -41,3 +41,9 @@ export function authValidation(credentials) {
     }
 }
 
+export function errorAuthenticating() {
+    return (dispatch) => {
+        dispatch(isAuthenticated(false));
+        dispatch(isAuthenticating(false));
+    }
+}

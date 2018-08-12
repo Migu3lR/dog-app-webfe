@@ -35,7 +35,7 @@ export const attachIotPolicy = () => (
  * @param {array} topics an array of strings of the topics that are being subscribed to
  * @param {fn} messageHandler the handler that should be called when a message is received
  */
-export const IOTSubs = (topics, messageHandler) => {
+export const IotSubs = (topics, messageHandler) => {
   attachIotPolicy()
     .then(() => {
       PubSub.subscribe(topics).subscribe({

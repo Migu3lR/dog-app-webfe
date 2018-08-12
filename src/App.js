@@ -5,7 +5,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { Auth, PubSub } from "aws-amplify";
 
 import { connect } from 'react-redux';
-import { authValidation } from './actions/authenticate';
+import { authValidation, errorAuthenticating, isAuthenticated } from './actions/authenticate';
 
 import { attachIotPolicy } from "./libs/awsMqtt";
 
@@ -16,32 +16,16 @@ class App extends Component {
   async componentDidMount() {
     await attachIotPolicy();
 
-    const credentials = await Auth.currentSession();
-    this.props.authValidation(credentials);
-
-    /*try {      
-      if (await Auth.currentSession()) {
-        this.userHasAuthenticated(true);
-      }
+    try {   
+      const credentials = await Auth.currentSession();
+      this.props.authValidation(credentials);
     } catch (e) {
       if (e !== 'No current user') {
         alert(e);
+      } else {
+        this.props.errorAuthenticating();
       }
     }
-
-    this.setState({ isAuthenticating: false });*/
-  }
-
-  IOTSubs = async () => {
-    await attachIotPolicy();
-    
-    PubSub.subscribe(`/redux/${PubSub._pluggables[0].clientId}`).subscribe({
-      next: (data) => {
-        console.log('Message received', data);
-      },
-      error: error => console.error(error),
-      close: () => console.log('Done'),
-    })
   }
 
   /*userHasAuthenticated = authenticated => {
@@ -57,12 +41,12 @@ class App extends Component {
 
   render() {
     const childProps = {
-      isAuthenticated: this.props.isAuthenticated,
-      userHasAuthenticated: this.props.userHasAuthenticated
+      isAuthenticated: this.props.isAuthenticated
+      //,userHasAuthenticated: this.props.userHasAuthenticated
     };
 
     return (
-      !this.state.isAuthenticating &&
+      !this.props.isAuthenticating &&
       <div className="App container">
         <Navbar fluid collapseOnSelect>
           <Navbar.Header>
@@ -73,7 +57,7 @@ class App extends Component {
           </Navbar.Header>
           <Navbar.Collapse>
             <Nav pullRight>
-              {this.state.isAuthenticated
+              {this.props.isAuthenticated
                 ? <NavItem onClick={this.handleLogout}>Logout</NavItem>
                 : <Fragment>
                     <LinkContainer to="/signup">
@@ -103,6 +87,7 @@ const mapStateToProps = (state) => {
 const MapDispatchToProps = (dispatch) => {
   return {
     authValidation: (credentials) => dispatch(authValidation(credentials)),
+    errorAuthenticating: () => dispatch(errorAuthenticating()),
     logout: () => dispatch(isAuthenticated(false))
   }
 }
