@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Link, withRouter } from "react-router-dom";
 import { Nav, Navbar, NavItem } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
-import { Auth, PubSub } from "aws-amplify";
+import { Auth } from "aws-amplify";
 
 import { connect } from 'react-redux';
 import { authValidation, errorAuthenticating, isAuthenticated } from './actions/authenticate';
@@ -77,10 +77,11 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state = {}) => {
   return {
-    isAuthenticated: state.isAuthenticated,
-    isAuthenticating: state.isAuthenticating
+    ...state
+    /*isAuthenticated: state.isAuthenticated,
+    isAuthenticating: state.isAuthenticating*/
   }
 }
 

@@ -6,44 +6,29 @@ import {
   ControlLabel
 } from "react-bootstrap";
 import { Auth } from "aws-amplify";
+import { connect } from 'react-redux';
+
+//import { authValidation, errorAuthenticating, isAuthenticated } from '../actions/authenticate';
+import { handleSignup, handleConfirmation, handleChange } from '../actions/register';
 
 import LoaderButton from "../components/LoaderButton";
 import "./Signup.css";
 
 
-export default class Signup extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isLoading: false,
-      email: "",
-      password: "",
-      confirmPassword: "",
-      confirmationCode: "",
-      newUser: null
-    };
-  }
-
+class Signup extends Component {
   validateForm() {
     return (
-      this.state.email.length > 0 &&
-      this.state.password.length > 0 &&
-      this.state.password === this.state.confirmPassword
+      this.props.signup.form.email.length > 0 &&
+      this.props.signup.form.password.length > 0 &&
+      this.props.signup.form.password === this.props.signup.form.confirmPassword
     );
   }
 
   validateConfirmationForm() {
-    return this.state.confirmationCode.length > 0;
+    return this.props.signup.form.confirmationCode.length > 0;
   }
 
-  handleChange = event => {
-    this.setState({
-      [event.target.id]: event.target.value
-    });
-  }
-
-  handleSubmit = async event => {
+/*  handleSubmit = async event => {
     event.preventDefault();
 
     this.setState({ isLoading: true });
@@ -77,17 +62,18 @@ export default class Signup extends Component {
         this.setState({ isLoading: false });
     }
   }
+  */
 
   renderConfirmationForm() {
     return (
-      <form onSubmit={this.handleConfirmationSubmit}>
+      <form onSubmit={this.props.handleConfirmation}>
         <FormGroup controlId="confirmationCode" bsSize="large">
           <ControlLabel>Confirmation Code</ControlLabel>
           <FormControl
             autoFocus
             type="tel"
-            value={this.state.confirmationCode}
-            onChange={this.handleChange}
+            value={this.props.signup.form.confirmationCode}
+            onChange={this.props.handleChange}
           />
           <HelpBlock>Please check your email for the code.</HelpBlock>
         </FormGroup>
@@ -96,7 +82,7 @@ export default class Signup extends Component {
           bsSize="large"
           disabled={!this.validateConfirmationForm()}
           type="submit"
-          isLoading={this.state.isLoading}
+          isLoading={this.props.signup.isLoading}
           text="Verify"
           loadingText="Verifying…"
         />
@@ -106,29 +92,29 @@ export default class Signup extends Component {
 
   renderForm() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form onSubmit={this.props.handleSignup}>
         <FormGroup controlId="email" bsSize="large">
           <ControlLabel>Email</ControlLabel>
           <FormControl
             autoFocus
             type="email"
-            value={this.state.email}
-            onChange={this.handleChange}
+            value={this.props.signup.form.email}
+            onChange={this.props.handleChange}
           />
         </FormGroup>
         <FormGroup controlId="password" bsSize="large">
           <ControlLabel>Password</ControlLabel>
           <FormControl
-            value={this.state.password}
-            onChange={this.handleChange}
+            value={this.props.signup.form.password}
+            onChange={this.props.handleChange}
             type="password"
           />
         </FormGroup>
         <FormGroup controlId="confirmPassword" bsSize="large">
           <ControlLabel>Confirm Password</ControlLabel>
           <FormControl
-            value={this.state.confirmPassword}
-            onChange={this.handleChange}
+            value={this.props.signup.form.confirmPassword}
+            onChange={this.props.handleChange}
             type="password"
           />
         </FormGroup>
@@ -137,7 +123,7 @@ export default class Signup extends Component {
           bsSize="large"
           disabled={!this.validateForm()}
           type="submit"
-          isLoading={this.state.isLoading}
+          isLoading={this.props.signup.isLoading}
           text="Signup"
           loadingText="Signing up…"
         />
@@ -148,10 +134,22 @@ export default class Signup extends Component {
   render() {
     return (
       <div className="Signup">
-        {this.state.newUser === null
+        {this.props.signup.newUser === null
           ? this.renderForm()
           : this.renderConfirmationForm()}
       </div>
     );
   }
 }
+
+const mapStateToProps = (state = {}) => { return { ...state } }
+
+const MapDispatchToProps = (dispatch) => {
+  return {
+    handleSignup: (credentials) => dispatch(handleSignup(credentials)),
+    handleConfirmation: (credentials) => dispatch(handleConfirmation(credentials)),
+    handleChange: (credentials) => dispatch(handleChange(credentials))
+  }
+}
+
+export default connect(mapStateToProps, MapDispatchToProps)(Signup);
